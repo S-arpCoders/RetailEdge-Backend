@@ -1,0 +1,3 @@
+[submodule "src/main/com.coders.RetailEdge/services"]
+	path = src/main/com.coders.RetailEdge/services
+	url = https://github.com/S-arpCoders/Database_Service.git
