@@ -15,7 +15,6 @@ import java.util.Map;
 public class AuthControllerGate {
 
     private final RestTemplate restTemplate;
-
     public AuthControllerGate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
