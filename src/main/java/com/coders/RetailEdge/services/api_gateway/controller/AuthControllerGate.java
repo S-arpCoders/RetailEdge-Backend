@@ -16,7 +16,6 @@ import java.util.Objects;
 public class AuthControllerGate {
 
     private final RestTemplate restTemplate;
-
     public AuthControllerGate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
