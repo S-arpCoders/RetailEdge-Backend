@@ -47,7 +47,7 @@ public class UserService {
                 String storedPassword = util.extractItemFromJson("password", responseBody);
 
                 if (storedPassword != null && storedPassword.equals(password)) {
-                    return ResponseEntity.ok("Login successful");
+                    return ResponseEntity.ok(responseBody);
                 } else {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN)
                             .body("Incorrect password. Please try again.");
