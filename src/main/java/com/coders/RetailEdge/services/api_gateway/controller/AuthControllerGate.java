@@ -23,6 +23,7 @@ public class AuthControllerGate {
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, Object> credentials) {
 
+        System.out.println(credentials.toString());
         String authServiceUrl = "localhost:8080";
         String loginUrl = authServiceUrl + "/api/auth/login";
         
