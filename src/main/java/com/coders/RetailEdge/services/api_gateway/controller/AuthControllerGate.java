@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthControllerGate {
@@ -22,7 +23,7 @@ public class AuthControllerGate {
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, Object> credentials) {
-
+        System.out.println("We have begun");
         String authServiceUrl = "http://localhost:8080";
         String loginUrl = authServiceUrl + "/api/internal/auth/login";
         credentials.put("secret_key",System.getenv("secret_key"));
@@ -30,8 +31,9 @@ public class AuthControllerGate {
         ResponseEntity<Map> authResponse = restTemplate.postForEntity(loginUrl, credentials, Map.class);
 
         if (authResponse.getStatusCode() == HttpStatus.OK) {
-            String userName = (String) Objects.requireNonNull(authResponse.getBody()).get("name");
+            String userName = (String) Objects.requireNonNull(authResponse.getBody()).get("email");
 
+            System.out.println(userName);
             String jwtToken = "Bearer " + generateJwtToken(userName);
 
             Map<String, String> response = new HashMap<>();
@@ -41,6 +43,7 @@ public class AuthControllerGate {
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                                  .body(Map.of("error", "Invalid credentials"));
+
         }
     }
 

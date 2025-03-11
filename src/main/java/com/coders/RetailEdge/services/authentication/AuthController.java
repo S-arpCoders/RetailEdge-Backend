@@ -1,5 +1,7 @@
 package com.coders.RetailEdge.services.authentication;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -11,22 +13,25 @@ import java.util.Objects;
 public class AuthController {
 
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody Map<String, Object> credentials) {
+    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, Object> credentials) {
         System.out.println(credentials.toString());
-        String name = (String) credentials.get("name");
-        String lastname = (String) credentials.get("lastname");
-        int age = (Integer) credentials.get("age");
+        String email = (String) credentials.get("email");
+        String lastname = (String) credentials.get("password");
         String secret_key = (String) credentials.get("secret_key");
 
         if (!Objects.equals(secret_key, System.getenv("secret_key"))) {
-            return Map.of("error", "Permission Rejected");
+            // Return 403 Forbidden status for invalid secret_key
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "Permission Rejected"));
         }
 
-        if ("Hello".equals(name) && "world".equals(lastname) && age > 18) {
-            return Map.of("name", name, "status", "success");
+        if ("valerie@gmail.com".equals(email) && "password".equals(lastname)) {
+            // Return 200 OK status for successful login
+            return ResponseEntity.ok(Map.of("email", email, "status", "Hi valerie"));
         } else {
-            return Map.of("error", "Invalid credentials");
+            // Return 401 Unauthorized status for invalid credentials
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid credentials"));
         }
     }
-
 }
