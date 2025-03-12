@@ -1,28 +1,42 @@
 package com.coders.RetailEdge.services.Inventory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+import java.util.Objects;
+
 @RestController
 @CrossOrigin
-@RequestMapping("/api/v1/inventory/products")
+@RequestMapping("/api/internal/inventory/products")
 public class ProductController {
 
     @Autowired
     private ProductService productService;
 
-    // 1. Create a new product
     @PostMapping
-    public ResponseEntity<String> createProduct(@RequestBody Product product) {
+    public ResponseEntity<Map<String, String>> createProduct(@RequestBody Map<String, Object> requestBody) {
+        String secretKey = (String) requestBody.get("secret_key");
+
+        if (!Objects.equals(secretKey, System.getenv("secret_key"))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "Permission Rejected"));
+        }
+
         try {
+            Product product = new ObjectMapper().convertValue(requestBody, Product.class);
             productService.createProduct(product);
-            return new ResponseEntity<>("Product created successfully", HttpStatus.CREATED);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(Map.of("message", "Product created successfully"));
         } catch (Exception e) {
-            return new ResponseEntity<>("Error creating product", HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error creating product"));
         }
     }
+
 
     // 2. Get a product by ID
     @GetMapping("/{productId}")
