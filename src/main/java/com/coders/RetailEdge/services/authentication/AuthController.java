@@ -1,26 +1,31 @@
 package com.coders.RetailEdge.services.authentication;
 
-import org.springframework.context.annotation.PropertySource;
+
+import com.coders.RetailEdge.services.authentication.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@PropertySource("auth")
-public class AuthController {
+public class AuthController { // Changed from UserController to AuthController for consistency
+
+    private final UserService userService;
+
+    // Constructor with correct name
+    public AuthController(UserService userService) { // Updated constructor name
+        this.userService = userService;
+    }
+
+    // Endpoint to register a new user
+    @PostMapping("/register")
+    public ResponseEntity<String> registerUser(@RequestBody Map<String, Object> userDetails) {
+        return userService.registerUser(userDetails);
+    }
 
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody Map<String, Object> credentials) {
-        String name = (String) credentials.get("name");
-        String lastname = (String) credentials.get("lastname");
-        int age = (Integer) credentials.get("age");
-
-        // For simplicity, just checking if the user exists with these details
-        if ("Hello".equals(name) && "world".equals(lastname) && age > 18) {
-            return Map.of("name", name, "status", "success");
-        } else {
-            return Map.of("error", "Invalid credentials");
-        }
+    public ResponseEntity<String> loginUser(@RequestBody Map<String, Object> credentials) {
+        return userService.loginUser(credentials);
     }
 }
