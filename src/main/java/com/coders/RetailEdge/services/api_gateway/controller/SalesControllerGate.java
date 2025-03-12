@@ -1,5 +1,6 @@
 package com.coders.RetailEdge.services.api_gateway.controller;
 
+import com.coders.RetailEdge.services.api_gateway.security.JwtUtil;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ public class SalesControllerGate {
     private final RestTemplate restTemplate;
 
     private static final Set<String> VALID_PARAMS = Set.of("a", "b", "c");
+
 
     public SalesControllerGate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;

@@ -1,5 +1,6 @@
 package com.coders.RetailEdge.services.api_gateway.controller;
 
+import com.coders.RetailEdge.services.api_gateway.security.GateServiceUtil;
 import com.coders.RetailEdge.services.api_gateway.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -17,20 +18,26 @@ import java.util.Objects;
 public class AuthControllerGate {
 
     private final RestTemplate restTemplate;
-    public AuthControllerGate(RestTemplate restTemplate) {
+
+    private final GateServiceUtil gateServiceUtil;
+
+    public AuthControllerGate(RestTemplate restTemplate, GateServiceUtil gateServiceUtil) {
         this.restTemplate = restTemplate;
+        this.gateServiceUtil = gateServiceUtil;
     }
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, Object> credentials) {
-        System.out.println("We have begun");
-        String authServiceUrl = "http://localhost:8080";
-        String loginUrl = authServiceUrl + "/api/internal/auth/login";
-        credentials.put("secret_key",System.getenv("secret_key"));
 
-        ResponseEntity<Map> authResponse = restTemplate.postForEntity(loginUrl, credentials, Map.class);
+        credentials.put("secret_key",gateServiceUtil.getSecretKey());
+        String url = gateServiceUtil.getUrl("/api/internal/auth/login");
+
+        ResponseEntity<Map> authResponse = restTemplate.postForEntity(url, credentials, Map.class);
+
+        System.out.println("This is the response👉🏾 " + authResponse.getBody());
 
         if (authResponse.getStatusCode() == HttpStatus.OK) {
+            System.out.println(authResponse.getBody());
             String userName = (String) Objects.requireNonNull(authResponse.getBody()).get("email");
 
             System.out.println(userName);
