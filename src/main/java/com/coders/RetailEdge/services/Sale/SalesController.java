@@ -1,7 +1,5 @@
 package com.coders.RetailEdge.services.Sale;
 
-import com.coders.RetailEdge.services.Sale.SaleDTO;
-import com.coders.RetailEdge.services.Sale.SalesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,7 +7,7 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/v1/sales")
-class SalesController {
+public class SalesController {
 
     @Autowired
     private SalesService salesService;

@@ -8,7 +8,7 @@ import java.util.Arrays;
 @Service
 public class ProductService {
 
-    private final String BASE_URL = "http://172.20.7.187:8081/product";
+    private final String BASE_URL = System.getenv("database-address") +  "/product";
     private final RestTemplate restTemplate = new RestTemplate();
 
     public void createProduct(Product product) throws Exception {
