@@ -15,11 +15,12 @@ public class UserService {
 
     JsonUtil util = new JsonUtil();
 
-    private static final String BASE_URL = "http://172.20.7.187:8081/users"; // Update with your backend's base URL
+    private static final String BASE_URL = System.getenv("database-address") + "/users"; // Update with your backend's base URL
 
     // Register a new user
     public ResponseEntity<String> registerUser(Map<String, Object> userDetails) {
         String url = BASE_URL + "/add";
+        System.out.println(userDetails.toString());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

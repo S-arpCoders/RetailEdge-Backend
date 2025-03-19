@@ -1,13 +1,16 @@
 package com.coders.RetailEdge.services.api_gateway.controller;
 
+import com.coders.RetailEdge.services.api_gateway.security.GateServiceUtil;
 import com.coders.RetailEdge.services.api_gateway.security.JwtUtil;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.http.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @CrossOrigin
 @RestController
@@ -15,24 +18,22 @@ import java.util.Map;
 public class AuthControllerGate {
 
     private final RestTemplate restTemplate;
+    private final GateServiceUtil gateServiceUtil;
 
-    public AuthControllerGate(RestTemplate restTemplate) {
+    public AuthControllerGate(RestTemplate restTemplate, GateServiceUtil gateServiceUtil) {
         this.restTemplate = restTemplate;
+        this.gateServiceUtil = gateServiceUtil;
     }
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, Object> credentials) {
-
-        System.out.println(credentials.toString());
-        String authServiceUrl = "http://localhost:8080";  // Adjust this to the correct auth service URL if needed
-        String loginUrl = authServiceUrl + "/api/auth/login";
+        credentials.put("secret_key", gateServiceUtil.getSecretKey());
+        String url = gateServiceUtil.getUrl("/api/internal/auth/login");
 
         try {
-            ResponseEntity<Map> authResponse = restTemplate.postForEntity(loginUrl, credentials, Map.class);
-
+            ResponseEntity<Map> authResponse = restTemplate.postForEntity(url, credentials, Map.class);
             if (authResponse.getStatusCode() == HttpStatus.OK) {
-                String userName = (String) authResponse.getBody().get("name");
-
+                String userName = (String) Objects.requireNonNull(authResponse.getBody()).get("email");
                 String jwtToken = "Bearer " + generateJwtToken(userName);
 
                 Map<String, String> response = new HashMap<>();
@@ -43,20 +44,32 @@ public class AuthControllerGate {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(Map.of("error", "Invalid credentials"));
             }
-        } catch (HttpClientErrorException.NotFound e) {
-            // Handle 404: User not found
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "User not found. Please check your email and try again."));
-        } catch (HttpClientErrorException e) {
-            // Handle other client errors (e.g., 400, 401, etc.)
-            return ResponseEntity.status(e.getStatusCode())
-                    .body(Map.of("error", "Authentication failed: " + e.getResponseBodyAsString()));
-        } catch (Exception e) {
-            // Handle unexpected errors
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "An unexpected error occurred. Please try again later."));
+        } catch (RestClientException e) {
+            return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT)
+                    .body(Map.of("error", "Connection timeout. Please try again later."));
         }
     }
+
+    @PostMapping("/register")
+    public ResponseEntity<Map<String, String>> register(@RequestBody Map<String, Object> userDetails) {
+        userDetails.put("secret_key", gateServiceUtil.getSecretKey());
+        String url = gateServiceUtil.getUrl("/api/internal/auth/register");
+
+        try {
+            ResponseEntity<Map> registerResponse = restTemplate.postForEntity(url, userDetails, Map.class);
+            if (registerResponse.getStatusCode() == HttpStatus.CREATED) {
+                return ResponseEntity.status(HttpStatus.CREATED)
+                        .body(Map.of("message", "User registered successfully"));
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "Registration failed"));
+            }
+        } catch (RestClientException e) {
+            return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT)
+                    .body(Map.of("error", "Connection timeout. Please try again later."));
+        }
+    }
+
 
     private String generateJwtToken(String username) {
         return JwtUtil.generateToken(username);

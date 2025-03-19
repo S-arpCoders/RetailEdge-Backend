@@ -1,15 +1,14 @@
 package com.coders.RetailEdge.services.authentication;
 
-
-import com.coders.RetailEdge.services.authentication.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/auth")
-public class AuthController { // Changed from UserController to AuthController for consistency
+@RequestMapping("/api/internal/auth")
+@CrossOrigin(origins = {"http://localhost:8080", "http://127.0.0.1:8080"})
+public class AuthController {
 
     private final UserService userService;
 
